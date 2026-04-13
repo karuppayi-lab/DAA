@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <string.h>
+int shift[256];
+void shiftTable(char pattern[]){
+    int m = strlen(pattern);
+    int i;
+    for(i=0;i<256;i++)
+        shift[i] = m;
+    for(i=0;i<m-1;i++)
+        shift[pattern[i]] = m-1-i;
+}
+int horspool(char text[], char pattern[]){
+    int n = strlen(text);
+    int m = strlen(pattern);
+    int i = m-1, k;
+    while(i < n){
+        k = 0;
+        while(k < m && pattern[m-1-k] == text[i-k])
+            k++;
+        if(k == m)
+            return i-m+1;
+        else
+            i = i + shift[text[i]];
+    }
+    return -1;
+}
+int main(){
+    char text[100], pattern[50];
+    int pos;
+    printf("Enter text: ");
+    if(fgets(text,sizeof(text),stdin));
+    printf("Enter pattern: ");
+    if(fgets(pattern,sizeof(pattern),stdin));
+    shiftTable(pattern);
+    pos = horspool(text,pattern);
+    if(pos >= 0)
+        printf("Pattern found at position: %d\n",pos+1);
+    else
+        printf("Pattern not found");
+    return 0;
+}
