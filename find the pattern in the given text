@@ -1,0 +1,25 @@
+#include<iostream>
+#include<string>
+using namespace std;
+int main(){
+   string txt;
+   string pattern;
+   cout<<"Enter the text:"<<endl;
+   cin>>txt;
+   cout<<"Enter the pattern:"<<endl;
+   cin>>pattern;
+   int a=txt.length();
+   int b=pattern.length();
+   for(int i=0;i<=a-b;i++){
+      int count=0;
+      for(int j=0;j<b;j++){
+         if(txt[i+j]==pattern[j]){
+            count++;
+         }
+         if(count==b){
+         cout<<"found at index:"<<i<<endl;
+         }
+      }
+   }
+   return 0;
+}
