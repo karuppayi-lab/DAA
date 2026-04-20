@@ -1,0 +1,111 @@
+#include <iostream>
+#include <queue>
+#include <cmath>
+using namespace std;
+
+// Node class
+class Node {
+public:
+    char data;
+    float freq;
+    Node *left, *right;
+
+    Node(char d, float f) {
+        data = d;
+        freq = f;
+        left = right = NULL;
+    }
+};
+
+// Comparator (Min Heap)
+class Compare {
+public:
+    bool operator()(Node* l, Node* r) {
+        return l->freq > r->freq;
+    }
+};
+
+float totalCompressedBits = 0;
+
+// Print codes + calculate compressed bits
+void printCodes(Node* root, string code) {
+    if (root == NULL)
+        return;
+
+    if (root->left == NULL && root->right == NULL) {
+        cout << root->data << " : " << code << endl;
+
+        // accumulate compressed bits
+        totalCompressedBits += root->freq * code.length();
+    }
+
+    printCodes(root->left, code + "0");
+    printCodes(root->right, code + "1");
+}
+
+// Huffman Coding
+void HuffmanCoding(char data[], float freq[], int size) {
+
+    priority_queue<Node*, vector<Node*>, Compare> pq;
+
+    float totalFreq = 0;
+
+    for (int i = 0; i < size; i++) {
+        pq.push(new Node(data[i], freq[i]));
+        totalFreq += freq[i];
+    }
+
+    // Build tree
+    while (pq.size() > 1) {
+        Node* left = pq.top(); pq.pop();
+        Node* right = pq.top(); pq.pop();
+
+        Node* newNode = new Node('$', left->freq + right->freq);
+        newNode->left = left;
+        newNode->right = right;
+
+        pq.push(newNode);
+    }
+
+    Node* root = pq.top();
+
+    cout << "\nHuffman Codes:\n";
+    printCodes(root, "");
+
+    // Calculate original bits
+    int fixedBits = ceil(log2(size));
+    float originalBits = totalFreq * fixedBits;
+
+    cout << "\nOriginal Bits = " << originalBits;
+    cout << "\nCompressed Bits = " << totalCompressedBits;
+
+    cout << "\nCompression Ratio = "
+         << (originalBits / totalCompressedBits) << endl;
+    float efficiency = ((fixedBits - totalCompressedBits) / fixedBits) * 100;
+    cout << "\nEfficiency (%) = " << efficiency;
+}
+
+// Main
+int main() {
+    int n;
+
+    cout << "Enter number of characters: ";
+    cin >> n;
+
+    char data[50];
+    float freq[50];
+
+    cout << "Enter characters:\n";
+    for (int i = 0; i < n; i++) {
+        cin >> data[i];
+    }
+
+    cout << "Enter frequencies:\n";
+    for (int i = 0; i < n; i++) {
+        cin >> freq[i];
+    }
+
+    HuffmanCoding(data, freq, n);
+
+    return 0;
+}
