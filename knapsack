@@ -1,0 +1,95 @@
+#include <iostream>
+
+using namespace std;
+
+int maxProfit = 0;
+int bestItems[100]; // Stores 1 (taken) or 0 (not taken)
+int currentItems[100];
+
+// Calculate the potential profit (Upper Bound)
+double getBound(int level, int currentProfit, int currentWeight, int n, int capacity, int p[], int w[]) {
+    if (currentWeight >= capacity) return 0;
+
+    double bound = (double)currentProfit;
+    int totalWeight = currentWeight;
+    int j = level + 1;
+
+    while (j < n && totalWeight + w[j] <= capacity) {
+        totalWeight += w[j];
+        bound += p[j];
+        j++;
+    }
+
+    if (j < n) {
+        bound += (double)(capacity - totalWeight) * p[j] / w[j];
+    }
+
+    return bound;
+}
+
+void solve(int level, int currentProfit, int currentWeight, int n, int capacity, int p[], int w[]) {
+    // If this path is better, save the profit and the items used
+    if (currentWeight <= capacity && currentProfit > maxProfit) {
+        maxProfit = currentProfit;
+        for (int i = 0; i < n; i++) {
+            bestItems[i] = currentItems[i];
+        }
+    }
+
+    if (level == n) return;
+
+    // 1. Try including the current item
+    if (currentWeight + w[level] <= capacity) {
+        currentItems[level] = 1; // Mark as taken
+        solve(level + 1, currentProfit + p[level], currentWeight + w[level], n, capacity, p, w);
+    }
+
+    // 2. Try excluding the current item
+    currentItems[level] = 0; // Mark as not taken
+    if (getBound(level, currentProfit, currentWeight, n, capacity, p, w) > maxProfit) {
+        solve(level + 1, currentProfit, currentWeight, n, capacity, p, w);
+    }
+}
+
+int main() {
+    int n, capacity;
+
+    cout << "Enter number of items: ";
+    cin >> n;
+    cout << "Enter knapsack capacity: ";
+    cin >> capacity;
+
+    int p[100], w[100], id[100];
+
+    for (int i = 0; i < n; i++) {
+        id[i] = i + 1; // Original ID to track item after sorting
+        cout << "Enter profit and weight for item " << i + 1 << ": ";
+        cin >> p[i] >> w[i];
+    }
+
+    // Manual Sort by Profit/Weight Ratio
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if ((double)p[i] / w[i] < (double)p[j] / w[j]) {
+                // Swap profit, weight, and the original ID
+                int tp = p[i]; p[i] = p[j]; p[j] = tp;
+                int tw = w[i]; w[i] = w[j]; w[j] = tw;
+                int ti = id[i]; id[i] = id[j]; id[j] = ti;
+            }
+        }
+    }
+
+    solve(0, 0, 0, n, capacity, p, w);
+
+    cout << "\n--- Result ---" << endl;
+    cout << "Maximum Profit: " << maxProfit << endl;
+    cout << "Items included (ID): ";
+    for (int i = 0; i < n; i++) {
+        if (bestItems[i] == 1) {
+            cout << id[i] << " ";
+        }
+    }
+    cout << endl;
+
+    return 0;
+}
